@@ -1,7 +1,7 @@
-import express, { Request, Response, NextFunction } from "express";
-import morgan from "morgan";
-import tourRouter from "./routes/tourRoutes";
-import userRouter from "./routes/userRoutes";
+import express, { Request, Response, NextFunction } from 'express';
+import morgan from 'morgan';
+import tourRouter from './routes/tourRoutes';
+import userRouter from './routes/userRoutes';
 
 export interface CustomRequest extends Request {
   requestTime?: string;
@@ -9,9 +9,9 @@ export interface CustomRequest extends Request {
 
 const app = express();
 
-// Middlewares
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
+// Middlewares check environment
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
 }
 
 app.use(express.json());
@@ -19,7 +19,7 @@ app.use(express.static(`${__dirname}/public`));
 
 // Custom middleware - Logging
 app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log("Hello from the middleware!");
+  console.log('Hello from the middleware!');
   next();
 });
 
@@ -30,7 +30,7 @@ app.use((req: CustomRequest, res: Response, next: NextFunction) => {
 });
 
 // Routes
-app.use("/api/v1/tours", tourRouter);
-app.use("/api/v1/users", userRouter);
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
 
 export default app;
