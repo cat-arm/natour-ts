@@ -2,6 +2,16 @@ import dotenv from 'dotenv';
 import app from './app';
 import mongoose from 'mongoose';
 
+// handle unhandled rejections (promise rejections) globally
+process.on('uncaughtException', (err: unknown) => {
+  if (err instanceof Error) {
+    console.log(err.name, err.message);
+  } else {
+    console.log('Unknown rejection:', err);
+  }
+  process.exit(1);
+});
+
 // download environment variables from .env file
 dotenv.config({ path: '.env' });
 
@@ -26,6 +36,18 @@ mongoose
 const port = process.env.PORT || 3000;
 
 // start the server and listen on the specified port
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`App running on port ${port}`);
+});
+
+process.on('unhandledRejection', (err: unknown) => {
+  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+    if (err instanceof Error) {
+    console.log(err.name, err.message);
+  } else {
+    console.log('Unknown exception:', err);
+  }
+  server.close(() => {
+    process.exit(1);
+  });
 });
