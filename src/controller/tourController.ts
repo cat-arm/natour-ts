@@ -1,96 +1,162 @@
-import { Request, Response, NextFunction } from "express";
-import * as fs from "fs";
-import { CustomRequest } from "../app";
-import { NewTourDto, TourDto } from "../dto/TourDto";
+import { Request, Response, NextFunction } from 'express';
+import Tour from '../models/tourModel';
+import APIFeatures from '../utils/apiFeatures';
+import catchAsync from '../utils/catchAsync';
+import AppError from '../utils/appError';
 
-const tours: TourDto[] = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, "utf-8"));
+interface TourRequest extends Request {
+  query: {
+    limit?: string;
+    sort?: string;
+    fields?: string;
+    [key: string]: any;
+  };
+}
 
-export const checkID = (req: CustomRequest, res: Response, next: NextFunction, val: string): void => {
-  console.log(`Tour id is: ${val}`);
-
-  // Convert val to a number and check validity
-  if (parseInt(val, 10) > tours.length) {
-    res.status(404).json({
-      status: "fail",
-      message: "Invalid ID",
-    });
-    return;
+class TourController {
+  public aliasTopTours(req: TourRequest, res: Response, next: NextFunction): void {
+    req.query.limit = '5';
+    req.query.sort = '-ratingsAverage,price';
+    req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+    next();
   }
 
-  next();
-};
+  public getAllTours = catchAsync(async (req: TourRequest, res: Response): Promise<void> => {
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
 
-export const checkBody = (req: CustomRequest, res: Response, next: NextFunction): void => {
-  if (!req.body.name || !req.body.price) {
-    res.status(400).json({
-      status: "fail",
-      message: "Missing name or price",
+    res.status(200).json({
+      status: 'success',
+      results: tours.length,
+      data: { tours }
     });
-    return;
-  }
-  next();
-};
-
-export const getAllTours = (req: CustomRequest, res: Response): void => {
-  console.log(req.requestTime);
-  res.status(200).json({
-    status: "success",
-    requestedAt: req.requestTime,
-    results: tours.length,
-    data: {
-      tours,
-    },
   });
-};
 
-export const getTour = (req: CustomRequest, res: Response): void => {
-  console.log(req.params);
-  const id = parseInt(req.params.id, 10);
+  public getTour = catchAsync(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const tour = await Tour.findById(req.params.id);
 
-  const tour = tours.find((el: TourDto) => el.id === id);
+    if (!tour) {
+      return next(new AppError('No tour found with that ID', 404));
+    }
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      tour,
-    },
+    res.status(200).json({
+      status: 'success',
+      data: { tour }
+    });
   });
-};
 
-export const createTour = (req: CustomRequest, res: Response): void => {
-  console.log(tours.length);
-  const newId = tours.length > 0 ? tours[tours.length - 1].id + 1 : 1;
-  console.log(newId);
-  const newTour: NewTourDto = { id: newId, ...req.body };
+  public createTour = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    const newTour = await Tour.create(req.body);
 
-  tours.push(newTour);
-
-  try {
-    fs.writeFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, JSON.stringify(tours));
     res.status(201).json({
-      status: "success",
-      data: { tour: newTour },
+      status: 'success',
+      data: { tour: newTour }
     });
-  } catch (err) {
-    res.status(500).json({
-      status: "fail",
-      message: "Error saving tour data",
+  });
+
+  public updateTour = catchAsync(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
     });
-  }
-};
 
-export const updateTour = (req: CustomRequest, res: Response): void => {
-  res.status(200).json({
-    status: "success",
-    data: {
-      tour: "<Updated tour here...>",
-    },
-  });
-};
+    if (!tour) {
+      return next(new AppError('No tour found with that ID', 404));
+    }
 
-export const deleteTour = (req: Request, res: Response): void => {
-  res.status(204).json({
-    status: "success",
-    data: null,
+    res.status(200).json({
+      status: 'success',
+      data: { tour }
+    });
   });
-};
+
+  public deleteTour = catchAsync(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const tour = await Tour.findByIdAndDelete(req.params.id);
+
+    if (!tour) {
+      return next(new AppError('No tour found with that ID', 404));
+    }
+
+    res.status(204).json({
+      status: 'success',
+      data: null
+    });
+  });
+
+  public getTourStats = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    const stats = await Tour.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } }
+      },
+      {
+        $group: {
+          _id: { $toUpper: '$difficulty' },
+          numTours: { $sum: 1 },
+          numRatings: { $sum: '$ratingsQuantity' },
+          avgRating: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' }
+        }
+      },
+      {
+        $sort: { avgPrice: 1 }
+      }
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: { stats }
+    });
+  });
+
+  public getMonthlyPlan = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    const year = parseInt(req.params.year);
+
+    const plan = await Tour.aggregate([
+      {
+        $unwind: '$startDates'
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $month: '$startDates' },
+          numTourStarts: { $sum: 1 },
+          tours: { $push: '$name' }
+        }
+      },
+      {
+        $addFields: { month: '$_id' }
+      },
+      {
+        $project: {
+          _id: 0
+        }
+      },
+      {
+        $sort: { numTourStarts: -1 }
+      },
+      {
+        $limit: 12
+      }
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: { plan }
+    });
+  });
+}
+
+export default new TourController();

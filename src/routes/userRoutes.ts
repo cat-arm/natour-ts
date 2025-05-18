@@ -1,9 +1,33 @@
-import express, { Router } from "express";
-import { getAllUsers, getUser, createUser, updateUser, deleteUser } from "../controller/userController";
+import { Router } from 'express';
+import authController from '../controller/authController';
+import userController from '../controller/userController';
 
-const router: Router = express.Router();
+const router = Router();
 
-router.route("/").get(getAllUsers).post(createUser);
-router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
+router.post('/signup', authController.signup);
+router.post('/login', authController.login);
+
+router.post('/forgotPassword', authController.forgotPassword);
+router.patch('/resetPassword/:token', authController.resetPassword);
+
+router.patch(
+  '/updateMyPassword',
+  authController.protect,
+  authController.updatePassword
+);
+
+router.patch('/updateMe', authController.protect, userController.updateMe);
+router.delete('/deleteMe', authController.protect, userController.deleteMe);
+
+router
+  .route('/')
+  .get(userController.getAllUsers)
+  .post(userController.createUser);
+
+router
+  .route('/:id')
+  .get(userController.getUser)
+  .patch(userController.updateUser)
+  .delete(userController.deleteUser);
 
 export default router;
