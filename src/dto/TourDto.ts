@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { IUser, IUserBase } from './UserDto';
-import { IReview, IReviewBase } from './ReviewDto';
+import { IUser, IUserBase } from './userDto';
+import { IReview, IReviewBase } from './reviewDto';
 
 // Enums
 export enum Difficulty {
