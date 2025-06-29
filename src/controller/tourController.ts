@@ -1,35 +1,29 @@
 import { Request, Response, NextFunction } from 'express';
-import factory from './handlerFactory';
-import Tour from '../models/tourModel';
+import Tour, { ITourDocument } from '../models/tourModel';
 import APIFeatures from '../utils/apiFeatures';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
+import { BaseController } from './baseController';
 
-interface TourRequest extends Request {
-  query: {
-    limit?: string;
-    sort?: string;
-    fields?: string;
-    [key: string]: any;
-  };
-}
+class TourController extends BaseController<ITourDocument> {
+  constructor() {
+    super(Tour);
+  }
 
-class TourController {
-  aliasTopTours(req: TourRequest, res: Response, next: NextFunction): void {
+  public aliasTopTours(req: Request, res: Response, next: NextFunction): void {
     req.query.limit = '5';
     req.query.sort = '-ratingsAverage,price';
     req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
     next();
   }
 
-  // use handle function
-  getAllTours = factory.getAll(Tour);
-  getTour = factory.getOne(Tour, { path: 'reviews' });
-  createTour = factory.createOne(Tour);
-  updateTour = factory.updateOne(Tour);
-  deleteTour = factory.deleteOne(Tour);
+  public getAllTours = this.getAll;
+  public getTour = this.getOne;
+  public createTour = this.createOne;
+  public updateTour = this.updateOne;
+  public deleteTour = this.deleteOne;
 
-  getTourStats = catchAsync(
+  public getTourStats = catchAsync(
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const stats = await Tour.aggregate([
         {
@@ -61,7 +55,7 @@ class TourController {
     }
   );
 
-  getMonthlyPlan = catchAsync(
+  public getMonthlyPlan = catchAsync(
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const year = parseInt(req.params.year);
 
@@ -109,7 +103,7 @@ class TourController {
 
   // /tours-within/:distance/center/:latlng/unit/:unit
   // /tours-within/233/center/34.111745,-118.113491/unit/mi
-  getToursWithin = catchAsync(
+  public getToursWithin = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
       const { distance, latlng, unit } = req.params;
       const [latStr, lngStr] = latlng.split(',') || [];
@@ -148,7 +142,7 @@ class TourController {
     }
   );
 
-  getDistances = catchAsync(
+  public getDistances = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
       const { latlng, unit } = req.params;
       const [latStr, lngStr] = latlng.split(',') || [];

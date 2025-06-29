@@ -5,6 +5,11 @@
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,
-    "esModuleInterop": true
-  }
+    "esModuleInterop": true,
+    // for use decorator
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  // for adjustable type of request of express
+  "typeRoots": ["./node_modules/@types", "./src/types"]
 }
