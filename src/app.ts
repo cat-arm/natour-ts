@@ -9,6 +9,7 @@ import hpp from 'hpp';
 import AppError from './utils/appError';
 import tourRouter from './routes/tourRoutes';
 import userRouter from './routes/userRoutes';
+import reviewRouter from './routes/reviewRoutes';
 import globalErrorHandler from './controller/errorController';
 
 export interface CustomRequest extends Request {
@@ -18,7 +19,7 @@ export interface CustomRequest extends Request {
 const app = express();
 
 // GLOBAL MIDDLEWARES
-// Middleware 1: Set security HTTP headers -> 
+// Middleware 1: Set security HTTP headers ->
 app.use(helmet());
 
 // Middleware 2: check environment
@@ -70,6 +71,7 @@ app.use((req: CustomRequest, res: Response, next: NextFunction) => {
 // Routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 // Middleware 10: Handle unhandled routes
 app.all('*', (req: CustomRequest, res: Response, next: NextFunction) => {
