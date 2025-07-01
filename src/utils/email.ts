@@ -1,38 +1,92 @@
 import nodemailer, { Transporter } from 'nodemailer';
+import pug from 'pug';
+import htmlToText from 'html-to-text';
+import path from 'path';
+import { Options } from 'nodemailer/lib/mailer';
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+interface IUser {
+  email: string;
+  name: string;
+}
 
 interface EmailOptions {
-    email: string;
-    subject: string;
-    message: string;
+  email: string;
+  subject: string;
+  message: string;
 }
 
-class Email {
-    private transporter: Transporter;
-    private from: string;
+export class Email {
+  private to: string;
+  private firstName: string;
+  private url: string;
+  private from: string;
 
-    constructor() {
-        this.from = 'Rithipong Leanghirunkun <hello@rithipong.com>';
-        this.transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST as string,
-            port: Number(process.env.EMAIL_PORT),
-            auth: {
-                user: process.env.EMAIL_USERNAME,
-                pass: process.env.EMAIL_PASSWORD
-            }
-        });
+  constructor(user: IUser, url: string) {
+    this.to = user.email;
+    this.firstName = user.name.split(' ')[0];
+    this.url = url;
+    this.from = `Rithipong Leanghirunkun <${process.env.EMAIL_FROM}>`;
+  }
+
+  private newTransport(): Transporter {
+    if (isProduction) {
+      // Sendgrid
+      return nodemailer.createTransport({
+        service: 'SendGrid',
+        auth: {
+          user: 'apikey',
+          pass: process.env.SENDGRID_API_KEY!
+        }
+      });
     }
 
-    public async send(options: EmailOptions): Promise<void> {
-        const mailOptions = {
-            from: this.from,
-            to: options.email,
-            subject: options.subject,
-            text: options.message
-            // html: options.html
-        };
+    return nodemailer.createTransport({
+      // mailtrap
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT),
+      auth: {
+        user: process.env.EMAIL_USERNAME!,
+        pass: process.env.EMAIL_PASSWORD!
+      }
+    });
+  }
 
-        await this.transporter.sendMail(mailOptions);
-    }
+  private async send(template: string, subject: string): Promise<void> {
+    const templatePath = path.resolve(
+      __dirname,
+      '../../views/email',
+      `${template}.pug`
+    );
+    // Render HTML from pug template
+    const html = pug.renderFile(templatePath, {
+      firstName: this.firstName,
+      url: this.url,
+      subject
+    });
+
+    // Define email options
+    const mailOptions: Options = {
+      from: this.from,
+      to: this.to,
+      subject,
+      html,
+      text: htmlToText.convert(html)
+    };
+
+    // Create transport and send email
+    await this.newTransport().sendMail(mailOptions);
+  }
+
+  public async sendWelcome(): Promise<void> {
+    await this.send('welcome', 'Welcome to the Natours Family!');
+  }
+
+  public async sendPasswordReset(): Promise<void> {
+    await this.send(
+      'passwordReset',
+      'Your password reset token (valid for only 10 minutes)'
+    );
+  }
 }
-
-export default new Email();

@@ -4,7 +4,7 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import { Document } from 'mongoose';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
-import Email from '../utils/email';
+import { Email } from '../utils/email';
 import User, { IUserDocument, UserRole } from '../models/userModel';
 // DTOs
 import {
@@ -205,11 +205,8 @@ class AuthController {
         )}/api/v1/users/resetPassword/${resetToken}`;
         const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
 
-        await Email.send({
-          email: user.email,
-          subject: 'Your password reset token (valid for 10 min)',
-          message
-        });
+        const email = new Email(user, resetURL);
+        await email.sendPasswordReset();
 
         res.status(200).json({
           status: 'success',
