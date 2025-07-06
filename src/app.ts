@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
 import hpp from 'hpp';
+import bookingRouter from './routes/bookingRoutes';
 
 import AppError from './utils/appError';
 import tourRouter from './routes/tourRoutes';
@@ -34,6 +35,13 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again in an hour!'
 });
 app.use('/api', limiter);
+
+// stripe more safe
+app.post(
+  '/api/v1/bookings/webhook-checkout',
+  express.raw({ type: 'application/json' }), // raw body only webhook
+  bookingRouter
+);
 
 // Middleware 4: Body parser, reading data from body into req.body -> limit request body size
 app.use(express.json({ limit: '10kb' }));
