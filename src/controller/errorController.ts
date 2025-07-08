@@ -39,13 +39,23 @@ class ErrorController {
     return new AppError('Your token has expired! Please log in again.', 401);
   }
 
-  private sendErrorDev(err: AppError, res: Response): void {
-    if (res.headersSent) return;
-    res.status(err.statusCode).json({
-      status: err.status,
-      error: err,
-      message: err.message,
-      stack: err.stack
+  private sendErrorDev(err: AppError, req: Request, res: Response): void {
+    // API
+    if (req.originalUrl.startsWith('/api')) {
+      res.status(err.statusCode).json({
+        status: err.status,
+        error: err,
+        message: err.message,
+        stack: err.stack
+      });
+      return;
+    }
+
+    // RENDERED WEBSITE
+    console.error('ERROR 💥', err);
+    return res.status(err.statusCode).render('error', {
+      title: 'Something went wrong!',
+      msg: err.message
     });
   }
 
@@ -85,7 +95,7 @@ class ErrorController {
     }
 
     if (process.env.NODE_ENV === 'development') {
-      this.sendErrorDev(new AppError(err.message, 500), res);
+      this.sendErrorDev(new AppError(err.message, 500), req, res);
     }
     // production
     else {

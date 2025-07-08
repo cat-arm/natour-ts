@@ -14,6 +14,7 @@ const router = Router();
 
 router.post('/signup', validateDto(SignupDto), authController.signup);
 router.post('/login', validateDto(LoginDto), authController.login);
+router.get('/logout', authController.logout);
 
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch(
@@ -22,48 +23,35 @@ router.patch(
   authController.resetPassword
 );
 
+// Protect all routes after this middleware
+router.use(authController.protect);
+
 router.patch(
   '/updateMyPassword',
-  authController.protect,
   validateDto(UpdatePasswordDto),
   authController.updatePassword
 );
-
+router.get('/me', userController.getMe, userController.getUserById);
 router.patch(
   '/updateMe',
-  authController.protect,
+  userController.uploadUserPhoto,
+  userController.resizeUserPhoto,
   validateDto(UpdateMeDto),
   userController.updateMe
 );
-router.delete('/deleteMe', authController.protect, userController.deleteMe);
+router.delete('/deleteMe', userController.deleteMe);
+
+router.use(authController.restrictTo('admin'));
 
 router
   .route('/')
   .get(userController.getAllUsers)
-  .post(
-    authController.protect,
-    authController.restrictTo('admin'),
-    validateDto(CreateUserDto),
-    userController.createUser
-  );
+  .post(validateDto(CreateUserDto), userController.createUser);
 
 router
   .route('/:id')
-  .get(
-    authController.protect,
-    authController.restrictTo('admin'),
-    userController.getUserById
-  )
-  .patch(
-    authController.protect,
-    authController.restrictTo('admin'),
-    validateDto(UpdateUserDto),
-    userController.updateUser
-  )
-  .delete(
-    authController.protect,
-    authController.restrictTo('admin'),
-    userController.deleteUser
-  );
+  .get(userController.getUserById)
+  .patch(validateDto(UpdateUserDto), userController.updateUser)
+  .delete(userController.deleteUser);
 
 export default router;

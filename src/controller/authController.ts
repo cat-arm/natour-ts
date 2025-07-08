@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt, { JwtPayload, Secret, SignOptions } from 'jsonwebtoken';
 import { Document } from 'mongoose';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
@@ -13,6 +13,7 @@ import {
   UpdatePasswordDto,
   ResetPasswordDto
 } from '../dto/authDto';
+import { promisify } from 'util';
 
 interface IJwtPayload {
   id: string;
@@ -116,6 +117,14 @@ class AuthController {
     }
   );
 
+  public logout = (req: Request<{}, {}, {}>, res: Response) => {
+    res.cookie('jwt', 'loggedout', {
+      expires: new Date(Date.now() + 10 * 1000),
+      httpOnly: true
+    });
+    res.status(200).json({ status: 'success' });
+  };
+
   public protect = catchAsync(
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       // Getting token and check of it's there
@@ -171,6 +180,48 @@ class AuthController {
       next();
     }
   );
+
+  // use for view which everyone can use (even guest can view) but it show logined or logout in ui
+  // isLoggedIn did not block but protect block
+  public isLoggedIn = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    if (req.cookies.jwt) {
+      try {
+        // verify token
+        const decoded = await new Promise<JwtPayload>((resolve, reject) => {
+          jwt.verify(
+            req.cookies.jwt,
+            process.env.JWT_SECRET!,
+            (err: jwt.VerifyErrors | null, decoded: any) => {
+              if (err || !decoded) return reject(err);
+              resolve(decoded as JwtPayload);
+            }
+          );
+        });
+
+        // Check if user still exists
+        const currentUser = await User.findById(decoded.id);
+        if (!currentUser) {
+          return next();
+        }
+
+        // Check if user changed password after the token was issued
+        if (decoded.iat && currentUser.changedPasswordAfter(decoded.iat)) {
+          return next();
+        }
+
+        // There is a logged in user
+        res.locals.user = currentUser;
+        return next();
+      } catch (err) {
+        return next();
+      }
+    }
+    next();
+  };
 
   public restrictTo = (...roles: string[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
