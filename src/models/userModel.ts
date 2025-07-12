@@ -86,7 +86,7 @@ const userSchema = new mongoose.Schema<IUserDocument, IUserModel>({
 });
 
 // Indexes for better performance
-userSchema.index({ email: 1 }, { unique: true });
+// userSchema.index({ email: 1 }, { unique: true }); // unique is auto index
 userSchema.index({ passwordResetToken: 1 }, { sparse: true });
 
 // Document middleware -> runs before save, create

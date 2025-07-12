@@ -6,6 +6,7 @@ import { BaseController } from './baseController';
 import { UpdateMeDto } from '../dto/userDto';
 import multer, { FileFilterCallback } from 'multer';
 import sharp from 'sharp';
+import { AuthRequest } from './authController';
 
 // Define types for filtered object
 interface FilteredObject {
@@ -53,7 +54,7 @@ class UserController extends BaseController<IUserDocument> {
   public uploadUserPhoto = upload.single('photo');
 
   public resizeUserPhoto = catchAsync(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
       if (!req.file || !req.user) return next();
 
       req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
@@ -90,11 +91,7 @@ class UserController extends BaseController<IUserDocument> {
   //   }
   // );
 
-  public getMe = (
-    req: Request<{}, {}, {}>,
-    res: Response,
-    next: NextFunction
-  ) => {
+  public getMe = (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return next(new AppError('You are not logged in!', 401));
     }
@@ -104,7 +101,7 @@ class UserController extends BaseController<IUserDocument> {
 
   public updateMe = catchAsync(
     async (
-      req: Request<{}, {}, UpdateMeDto>,
+      req: AuthRequest & { body: UpdateMeDto },
       res: Response,
       next: NextFunction
     ): Promise<void> => {
@@ -145,7 +142,11 @@ class UserController extends BaseController<IUserDocument> {
   );
 
   public deleteMe = catchAsync(
-    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    async (
+      req: AuthRequest,
+      res: Response,
+      next: NextFunction
+    ): Promise<void> => {
       await User.findByIdAndUpdate(req.user?.id, { active: false });
 
       res.status(204).json({

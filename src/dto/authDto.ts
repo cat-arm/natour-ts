@@ -1,4 +1,10 @@
-import { IsEmail, IsString, MinLength, Matches } from 'class-validator';
+import { IsEmail, IsString, MinLength } from 'class-validator';
+import { UserRole } from '../models/userModel';
+
+export type AuthUserDto = {
+  id: string;
+  role: UserRole;
+};
 
 export class SignupDto {
   @IsString()
@@ -31,6 +37,11 @@ export class UpdatePasswordDto {
 
   @MinLength(8)
   passwordConfirm!: string;
+}
+
+export class ForgotPasswordDto {
+  @IsEmail()
+  email!: string;
 }
 
 export class ResetPasswordDto {

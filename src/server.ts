@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import 'reflect-metadata';
 import app from './app';
 import mongoose from 'mongoose';
 
@@ -42,7 +43,7 @@ const server = app.listen(port, () => {
 
 process.on('unhandledRejection', (err: unknown) => {
   console.log('UNHANDLED REJECTION! 💥 Shutting down...');
-    if (err instanceof Error) {
+  if (err instanceof Error) {
     console.log(err.name, err.message);
   } else {
     console.log('Unknown exception:', err);

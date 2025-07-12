@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import { Request, Response, NextFunction } from 'express';
 import Stripe from 'stripe';
 import Tour from '../models/tourModel';
@@ -5,10 +6,11 @@ import Booking, { IBookingDocument } from '../models/bookingModel';
 import catchAsync from '../utils/catchAsync';
 import { BaseController } from './baseController';
 import User from '../models/userModel';
+import { AuthRequest } from './authController';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2025-06-30.basil'
-});
+dotenv.config({ path: '.env' });
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 class BookingController extends BaseController<IBookingDocument> {
   constructor() {
@@ -22,7 +24,11 @@ class BookingController extends BaseController<IBookingDocument> {
   public deleteBooking = this.deleteOne;
 
   public getCheckoutSession = catchAsync(
-    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    async (
+      req: AuthRequest,
+      res: Response,
+      next: NextFunction
+    ): Promise<void> => {
       // get the currently tour
       const tour = await Tour.findById(req.params.tourId);
       if (!tour) {

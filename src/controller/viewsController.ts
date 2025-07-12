@@ -4,6 +4,7 @@ import User from '../models/userModel';
 import Booking from '../models/bookingModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
+import { AuthRequest } from './authController';
 
 // use for render html
 class ViewController {
@@ -63,7 +64,11 @@ class ViewController {
   };
 
   public getMyTours = catchAsync(
-    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    async (
+      req: AuthRequest,
+      res: Response,
+      next: NextFunction
+    ): Promise<void> => {
       // Find all bookings
       const bookings = await Booking.find({ user: req.user!.id });
 
@@ -80,7 +85,10 @@ class ViewController {
 
   // validate in mongo
   public updateUserData = catchAsync(
-    async (req: Request, res: Response): Promise<void> => {
+    async (
+      req: AuthRequest & { body: { name: string; email: string } },
+      res: Response
+    ): Promise<void> => {
       const updatedUser = await User.findByIdAndUpdate(
         req.user!.id,
         {

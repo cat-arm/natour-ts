@@ -4,6 +4,15 @@ import APIFeatures from '../utils/apiFeatures';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
 
+// export interface QueryRequest extends Request {
+//   query: {
+//     limit?: string;
+//     sort?: string;
+//     fields?: string;
+//     [key: string]: any;
+//   };
+// }
+
 // abstract base class for use in only subclass -> cant use direct new BaseController(User) have to extends
 // public (default) can call method normally
 // protected cam use in this class or subclass

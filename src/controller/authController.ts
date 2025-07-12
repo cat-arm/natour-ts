@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
+import type { StringValue } from 'ms';
 import jwt, { JwtPayload, Secret, SignOptions } from 'jsonwebtoken';
 import { Document } from 'mongoose';
 import catchAsync from '../utils/catchAsync';
@@ -11,9 +12,21 @@ import {
   SignupDto,
   LoginDto,
   UpdatePasswordDto,
-  ResetPasswordDto
+  ResetPasswordDto,
+  ForgotPasswordDto
 } from '../dto/authDto';
-import { promisify } from 'util';
+
+export interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    role: UserRole;
+  };
+}
+type AuthSignupRequest = Request<{}, {}, SignupDto>;
+type AuthLoginRequest = Request<{}, {}, LoginDto>;
+type AuthUpdatePasswordRequest = AuthRequest & { body: UpdatePasswordDto };
+type AuthForgotPasswordRequest = Request<{}, {}, ForgotPasswordDto>;
+type AuthResetPasswordRequest = Request<{}, {}, ResetPasswordDto>;
 
 interface IJwtPayload {
   id: string;
@@ -37,7 +50,7 @@ type UserWithMethods = IUserDocument & Document;
 class AuthController {
   private signToken(id: string): string {
     const options: SignOptions = {
-      expiresIn: Number(process.env.JWT_EXPIRES_IN)
+      expiresIn: process.env.JWT_EXPIRES_IN as StringValue
     };
     return jwt.sign({ id }, process.env.JWT_SECRET!, options);
   }
@@ -74,7 +87,7 @@ class AuthController {
   }
 
   public signup = catchAsync(
-    async (req: Request<{}, {}, SignupDto>, res: Response): Promise<void> => {
+    async (req: AuthSignupRequest, res: Response): Promise<void> => {
       const newUser = ((await User.create({
         name: req.body.name,
         email: req.body.email,
@@ -89,7 +102,7 @@ class AuthController {
 
   public login = catchAsync(
     async (
-      req: Request<{}, {}, LoginDto>,
+      req: AuthLoginRequest,
       res: Response,
       next: NextFunction
     ): Promise<void> => {
@@ -117,7 +130,7 @@ class AuthController {
     }
   );
 
-  public logout = (req: Request<{}, {}, {}>, res: Response) => {
+  public logout = (req: Request, res: Response) => {
     res.cookie('jwt', 'loggedout', {
       expires: new Date(Date.now() + 10 * 1000),
       httpOnly: true
@@ -126,7 +139,11 @@ class AuthController {
   };
 
   public protect = catchAsync(
-    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    async (
+      req: AuthRequest,
+      res: Response,
+      next: NextFunction
+    ): Promise<void> => {
       // Getting token and check of it's there
       let token: string | undefined;
       if (
@@ -184,7 +201,7 @@ class AuthController {
   // use for view which everyone can use (even guest can view) but it show logined or logout in ui
   // isLoggedIn did not block but protect block
   public isLoggedIn = async (
-    req: Request,
+    req: AuthLoginRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
@@ -224,7 +241,7 @@ class AuthController {
   };
 
   public restrictTo = (...roles: string[]) => {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: AuthRequest, res: Response, next: NextFunction) => {
       // roles[('admin', 'lead-guide')].role = 'user';
       if (!req.user || !roles.includes(req.user.role)) {
         return next(
@@ -236,7 +253,11 @@ class AuthController {
   };
 
   public forgotPassword = catchAsync(
-    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    async (
+      req: AuthForgotPasswordRequest,
+      res: Response,
+      next: NextFunction
+    ): Promise<void> => {
       // Get user based on POSTed email
       const user = (await User.findOne({
         email: req.body.email
@@ -280,7 +301,7 @@ class AuthController {
 
   public resetPassword = catchAsync(
     async (
-      req: Request<{}, {}, ResetPasswordDto>,
+      req: AuthResetPasswordRequest,
       res: Response,
       next: NextFunction
     ): Promise<void> => {
@@ -316,11 +337,11 @@ class AuthController {
 
   public updatePassword = catchAsync(
     async (
-      req: Request<{}, {}, UpdatePasswordDto>,
+      req: AuthUpdatePasswordRequest,
       res: Response,
       next: NextFunction
     ): Promise<void> => {
-      if (!req.user?.id) {
+      if (!req.user || !req.user?.id) {
         return next(new AppError('Please log in to update password', 401));
       }
 
