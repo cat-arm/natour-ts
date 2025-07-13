@@ -9,10 +9,12 @@ router.use(authController.protect);
 
 // Checkout session (public route after login)
 router.get('/checkout-session/:tourId', bookingController.getCheckoutSession);
-// router.route('/checkout-session/:tourId').post(
-//   express.raw({ type: 'application/json' }), // raw body only webhook
-//   bookingController.webhookCheckout
-// );
+// webhook for stripe call back
+router.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout
+);
 
 // Restrict to admin and lead-guide for all routes below
 router.use(authController.restrictTo('admin', 'lead-guide'));
