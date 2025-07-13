@@ -1,6 +1,6 @@
 import nodemailer, { Transporter } from 'nodemailer';
 import pug from 'pug';
-import htmlToText from 'html-to-text';
+import { htmlToText } from 'html-to-text';
 import path from 'path';
 import { Options } from 'nodemailer/lib/mailer';
 
@@ -54,39 +54,27 @@ export class Email {
   }
 
   private async send(template: string, subject: string): Promise<void> {
-    const templatePath = path.resolve(
-      __dirname,
-      '../../views/email',
+    const templatePath = path.join(
+      process.cwd(),
+      'src',
+      'views',
+      'email',
       `${template}.pug`
     );
-    console.log('tem', templatePath);
     // Render HTML from pug template
-    // const html = pug.renderFile(templatePath, {
-    //   firstName: this.firstName,
-    //   url: this.url,
-    //   subject
-    // });
-    let html;
-    try {
-      html = pug.renderFile(templatePath, {
-        firstName: this.firstName,
-        url: this.url,
-        subject
-      });
-    } catch (err) {
-      console.log('🔥 Error rendering pug:', err);
-      throw err; // จะได้เห็น stack trace เต็ม
-    }
-    console.log('html', html);
+    const html = pug.renderFile(templatePath, {
+      firstName: this.firstName,
+      url: this.url,
+      subject
+    });
     // Define email options
     const mailOptions: Options = {
       from: this.from,
       to: this.to,
       subject,
       html,
-      text: htmlToText.convert(html)
+      text: htmlToText(html)
     };
-    console.log('mail', mailOptions);
     // Create transport and send email
     await this.newTransport().sendMail(mailOptions);
   }

@@ -93,7 +93,10 @@ class BookingController extends BaseController<IBookingDocument> {
     if (tour && userDoc) {
       const user = userDoc?.id;
       await Booking.create({ tour, user, price });
-      const email = new Email(userDoc, '');
+      const email = new Email(
+        userDoc,
+        'https://localhost:3000.com/payment-success'
+      );
       await email.sendBookingConfirmation();
     }
   };
