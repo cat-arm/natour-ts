@@ -7,6 +7,7 @@ import catchAsync from '../utils/catchAsync';
 import { BaseController } from './baseController';
 import User from '../models/userModel';
 import { AuthRequest } from './authController';
+import { Email } from '../utils/email';
 
 dotenv.config({ path: '.env' });
 
@@ -86,11 +87,14 @@ class BookingController extends BaseController<IBookingDocument> {
     session: Stripe.Checkout.Session
   ): Promise<void> => {
     const tour = session.client_reference_id;
-    const user = (await User.findOne({ email: session.customer_email! }))?.id;
+    const userDoc = await User.findOne({ email: session.customer_email! });
     const price = session.amount_total ? session.amount_total / 100 : 0;
 
-    if (tour && user) {
+    if (tour && userDoc) {
+      const user = userDoc?.id;
       await Booking.create({ tour, user, price });
+      const email = new Email(userDoc, '');
+      await email.sendBookingConfirmation();
     }
   };
 
@@ -104,11 +108,15 @@ class BookingController extends BaseController<IBookingDocument> {
     let event: Stripe.Event;
 
     try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET as string
-      );
+      if (process.env.NODE_ENV === 'development') {
+        event = req.body; // ใช้ body ตรง ๆ
+      } else {
+        event = stripe.webhooks.constructEvent(
+          req.body,
+          sig,
+          process.env.STRIPE_WEBHOOK_SECRET as string
+        );
+      }
     } catch (err) {
       res.status(400).send(`Webhook error: ${(err as Error).message}`);
       return;

@@ -59,13 +59,25 @@ export class Email {
       '../../views/email',
       `${template}.pug`
     );
+    console.log('tem', templatePath);
     // Render HTML from pug template
-    const html = pug.renderFile(templatePath, {
-      firstName: this.firstName,
-      url: this.url,
-      subject
-    });
-
+    // const html = pug.renderFile(templatePath, {
+    //   firstName: this.firstName,
+    //   url: this.url,
+    //   subject
+    // });
+    let html;
+    try {
+      html = pug.renderFile(templatePath, {
+        firstName: this.firstName,
+        url: this.url,
+        subject
+      });
+    } catch (err) {
+      console.log('🔥 Error rendering pug:', err);
+      throw err; // จะได้เห็น stack trace เต็ม
+    }
+    console.log('html', html);
     // Define email options
     const mailOptions: Options = {
       from: this.from,
@@ -74,11 +86,10 @@ export class Email {
       html,
       text: htmlToText.convert(html)
     };
-
+    console.log('mail', mailOptions);
     // Create transport and send email
     await this.newTransport().sendMail(mailOptions);
   }
-
   public async sendWelcome(): Promise<void> {
     await this.send('welcome', 'Welcome to the Natours Family!');
   }
@@ -88,5 +99,9 @@ export class Email {
       'passwordReset',
       'Your password reset token (valid for only 10 minutes)'
     );
+  }
+
+  public async sendBookingConfirmation(): Promise<void> {
+    await this.send('bookingConfirmation', 'Your booking was successful!');
   }
 }

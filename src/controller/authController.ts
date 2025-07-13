@@ -95,6 +95,8 @@ class AuthController {
         passwordConfirm: req.body.passwordConfirm,
         role: UserRole.USER
       })) as unknown) as UserWithMethods;
+      const email = new Email(newUser, 'https://mock-profile-url.com/newuser');
+      await email.sendWelcome();
 
       this.createSendToken(newUser, 201, res);
     }
