@@ -39,6 +39,12 @@ router.patch(
   validateDto(UpdateMeDto),
   userController.updateMe
 );
+router.patch(
+  '/updatePhoto',
+  userController.uploadUserPhoto,
+  userController.resizeUserPhoto,
+  userController.updatePhoto
+);
 router.delete('/deleteMe', userController.deleteMe);
 
 router.use(authController.restrictTo('admin'));

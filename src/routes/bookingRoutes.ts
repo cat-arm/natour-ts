@@ -16,6 +16,11 @@ router.post(
   bookingController.webhookCheckout
 );
 
+router
+  .route('/:id')
+  .get(bookingController.getBooking)
+  .patch(bookingController.updateBooking);
+
 // Restrict to admin and lead-guide for all routes below
 router.use(authController.restrictTo('admin', 'lead-guide'));
 
@@ -24,10 +29,6 @@ router
   .get(bookingController.getAllBookings)
   .post(bookingController.createBooking);
 
-router
-  .route('/:id')
-  .get(bookingController.getBooking)
-  .patch(bookingController.updateBooking)
-  .delete(bookingController.deleteBooking);
+router.route('/:id').delete(bookingController.deleteBooking);
 
 export default router;

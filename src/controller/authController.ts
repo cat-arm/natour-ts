@@ -95,7 +95,10 @@ class AuthController {
         passwordConfirm: req.body.passwordConfirm,
         role: UserRole.USER
       })) as unknown) as UserWithMethods;
-      const email = new Email(newUser, 'https://mock-profile-url.com/newuser');
+      const email = new Email(newUser,         
+        process.env.NODE_ENV === 'development'
+          ? `http://localhost:${process.env.PORT}/api/v1/users/updatePhoto`
+          : `${process.env.URL}`);
       await email.sendWelcome();
 
       this.createSendToken(newUser, 201, res);

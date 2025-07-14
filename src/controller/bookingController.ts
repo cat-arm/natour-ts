@@ -92,10 +92,12 @@ class BookingController extends BaseController<IBookingDocument> {
 
     if (tour && userDoc) {
       const user = userDoc?.id;
-      await Booking.create({ tour, user, price });
+      const newBooking = await Booking.create({ tour, user, price });
       const email = new Email(
         userDoc,
-        'https://localhost:3000.com/payment-success'
+        process.env.NODE_ENV === 'development'
+          ? `http://localhost:${process.env.PORT}/api/v1/bookings/${newBooking._id}`
+          : `${process.env.URL}`
       );
       await email.sendBookingConfirmation();
     }

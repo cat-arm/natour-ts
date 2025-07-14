@@ -7,6 +7,7 @@ import { UpdateMeDto } from '../dto/userDto';
 import multer, { FileFilterCallback } from 'multer';
 import sharp from 'sharp';
 import { AuthRequest } from './authController';
+import path from 'path';
 
 // Define types for filtered object
 interface FilteredObject {
@@ -59,11 +60,13 @@ class UserController extends BaseController<IUserDocument> {
 
       req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
 
+      const saveDir = path.resolve(__dirname, '../../src/public/img/users');
+      console.log(1, saveDir);
       await sharp(req.file.buffer)
         .resize(500, 500)
         .toFormat('jpeg')
         .jpeg({ quality: 90 })
-        .toFile(`public/img/users/${req.file.filename}`);
+        .toFile(path.join(saveDir, req.file.filename));
 
       next();
     }
@@ -126,6 +129,38 @@ class UserController extends BaseController<IUserDocument> {
       const updatedUser = await User.findByIdAndUpdate(
         req.user?.id,
         filteredBody,
+        {
+          new: true,
+          runValidators: true
+        }
+      );
+
+      res.status(200).json({
+        status: 'success',
+        data: {
+          user: updatedUser
+        }
+      });
+    }
+  );
+
+  public updatePhoto = catchAsync(
+    async (
+      req: AuthRequest,
+      res: Response,
+      next: NextFunction
+    ): Promise<void> => {
+      if (!req.user) {
+        return next(new AppError('You are not logged in!', 401));
+      }
+      if (!req.file) {
+        return next(new AppError('No photo uploaded!', 400));
+      }
+
+      // Update photo field ใน DB
+      const updatedUser = await User.findByIdAndUpdate(
+        req.user.id,
+        { photo: req.file.filename },
         {
           new: true,
           runValidators: true
