@@ -16,17 +16,16 @@ router.post(
   bookingController.webhookCheckout
 );
 
-router
-  .route('/:id')
-  .get(bookingController.getBooking)
-  .patch(bookingController.updateBooking);
+router.route('/:id').get(bookingController.getBooking);
 
 // Restrict to admin and lead-guide for all routes below
 router.use(authController.restrictTo('admin', 'lead-guide'));
 
+router.route('/').get(bookingController.getAllBookings);
+
 router
-  .route('/')
-  .get(bookingController.getAllBookings)
+  .route('/:id')
+  .patch(bookingController.updateBooking)
   .post(bookingController.createBooking);
 
 router.route('/:id').delete(bookingController.deleteBooking);
