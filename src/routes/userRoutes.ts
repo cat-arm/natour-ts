@@ -15,7 +15,6 @@ const router = Router();
 router.post('/signup', validateDto(SignupDto), authController.signup);
 router.post('/login', validateDto(LoginDto), authController.login);
 router.get('/logout', authController.logout);
-
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch(
   '/resetPassword/:token',
@@ -61,3 +60,278 @@ router
   .delete(userController.deleteUser);
 
 export default router;
+
+/**
+ * @swagger
+ * /users/signup:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *               - passwordConfirm
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 example: john10@example.com
+ *               password:
+ *                 type: string
+ *                 example: test1234
+ *               passwordConfirm:
+ *                 type: string
+ *                 example: test1234
+ *     responses:
+ *       201:
+ *         description: Signup successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example:
+ *                 status: success
+ *                 token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzdjNTVjODM4Yjg1YWQwMGNjYjdhMyIsImlhdCI6MTc1MjY3OTc3NiwiZXhwIjoxNzYwNDU1Nzc2fQ.eUdNzhxgVz7y3AYF-hlc7So_pp0NxCf4zg0jU6snOT8
+ *                 data:
+ *                   userObj:
+ *                     _id: 6877c55c838b85ad00ccb7a3
+ *                     name: John Doe
+ *                     email: john12@example.com
+ *                     role: user
+ *                     active: true
+ *                     __v: 0
+ */
+/**
+ * @swagger
+ * /users/login:
+ *   post:
+ *     summary: Login user and get JWT token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: john9@example.com
+ *               password:
+ *                 type: string
+ *                 example: test1234
+ *     responses:
+ *       200:
+ *         description: Login successful, returns JWT token and user data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 token:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzNkZTczYjRkNWU2NTRmZWFlZDNmMCIsImlhdCI6MTc1MjY3OTMwMywiZXhwIjoxNzYwNDU1MzAzfQ.SdavqKM8__K4M8HeTBCx0Ki3Fyb_jiK7zq2_ON4bc38
+ *                 data:
+ *                   type: object
+ *                   example:
+ *                     userObj:
+ *                       _id: 6873de73b4d5e654feaed3f0
+ *                       name: John Doe
+ *                       email: john9@example.com
+ *                       role: user
+ *                       __v: 0
+ *       400:
+ *         description: Missing email or password
+ *       401:
+ *         description: Incorrect email or password
+ */
+/**
+ * @swagger
+ * /users/me:
+ *   get:
+ *     summary: Get current user profile
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzNkZTczYjRkNWU2NTRmZWFlZDNmMCIsImlhdCI6MTc1MjY3OTMwMywiZXhwIjoxNzYwNDU1MzAzfQ.SdavqKM8__K4M8HeTBCx0Ki3Fyb_jiK7zq2_ON4bc38]
+ *     responses:
+ *       200:
+ *         description: User profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 token:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzNkZTczYjRkNWU2NTRmZWFlZDNmMCIsImlhdCI6MTc1MjY3OTMwMywiZXhwIjoxNzYwNDU1MzAzfQ.SdavqKM8__K4M8HeTBCx0Ki3Fyb_jiK7zq2_ON4bc38
+ *                 data:
+ *                   type: object
+ *                   example:
+ *                     userObj:
+ *                       _id: 6873de73b4d5e654feaed3f0
+ *                       name: John Doe
+ *                       email: john9@example.com
+ *                       role: user
+ *                       __v: 0
+ *       401:
+ *         description: Unauthorized
+ */
+/**
+ * @swagger
+ * /users/updateMyPassword:
+ *   patch:
+ *     summary: Update current user's password
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzdjNTVjODM4Yjg1YWQwMGNjYjdhMyIsImlhdCI6MTc1MjY3OTc3NiwiZXhwIjoxNzYwNDU1Nzc2fQ.eUdNzhxgVz7y3AYF-hlc7So_pp0NxCf4zg0jU6snOT8]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - passwordCurrent
+ *               - password
+ *               - passwordConfirm
+ *             properties:
+ *               passwordCurrent:
+ *                 type: string
+ *                 example: test1234
+ *               password:
+ *                 type: string
+ *                 example: newpassword123
+ *               passwordConfirm:
+ *                 type: string
+ *                 example: newpassword123
+ *     responses:
+ *       200:
+ *         description: Password updated successfully, returns JWT token and user data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 token:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   example:
+ *                     userObj:
+ *                       _id: 6873de73b4d5e654feaed3f0
+ *                       name: John Doe
+ *                       email: john9@example.com
+ *                       role: user
+ *                       __v: 0
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ */
+/**
+ * @swagger
+ * /users/logout:
+ *   get:
+ *     summary: Logout user (clear JWT cookie)
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     AuthUser:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         role:
+ *           type: string
+ *           enum: [user, guide, lead-guide, admin]
+ *
+ *     SignupDto:
+ *       type: object
+ *       required:
+ *         - name
+ *         - email
+ *         - password
+ *         - passwordConfirm
+ *       properties:
+ *         name:
+ *           type: string
+ *           example: John Doe
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: john10@example.com
+ *         password:
+ *           type: string
+ *           example: test1234
+ *         passwordConfirm:
+ *           type: string
+ *           example: test1234
+ *
+ *     LoginDto:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: john10@example.com
+ *         password:
+ *           type: string
+ *           example: test1234
+ *
+ *     UpdatePasswordDto:
+ *       type: object
+ *       required:
+ *         - passwordCurrent
+ *         - password
+ *         - passwordConfirm
+ *       properties:
+ *         passwordCurrent:
+ *           type: string
+ *           example: test1234
+ *         password:
+ *           type: string
+ *           example: newpassword123
+ *         passwordConfirm:
+ *           type: string
+ *           example: newpassword123
+ */

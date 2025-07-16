@@ -19,6 +19,7 @@ import reviewRouter from './routes/reviewRoutes';
 import bookingRouter from './routes/bookingRoutes';
 import bookingController from './controller/bookingController';
 import viewRouter from './routes/viewRoutes';
+import { setupSwagger } from './swagger';
 
 export interface CustomRequest extends Request {
   requestTime?: string;
@@ -26,7 +27,7 @@ export interface CustomRequest extends Request {
 
 const app = express();
 
-// inforท express to use proxy from header ex X-Forwarded-For, X-Forwarded-Proto -> get the real ip and protocol of client
+// inform express to use proxy from header ex X-Forwarded-For, X-Forwarded-Proto -> get the real ip and protocol of client
 app.enable('trust proxy');
 
 // inform express to use pug for render html
@@ -106,6 +107,9 @@ app.use((req: CustomRequest, res: Response, next: NextFunction) => {
   // console.log(req.headers);
   next();
 });
+
+// use swagger
+setupSwagger(app);
 
 // Routes
 app.use('/', viewRouter);
