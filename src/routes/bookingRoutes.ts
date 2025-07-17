@@ -37,7 +37,7 @@ router.route('/:id').delete(bookingController.deleteBooking);
  *     summary: Create Stripe checkout session for a tour
  *     tags: [Booking]
  *     security:
- *       - bearerAuth: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzdjNTVjODM4Yjg1YWQwMGNjYjdhMyIsImlhdCI6MTc1MjY3OTc3NiwiZXhwIjoxNzYwNDU1Nzc2fQ.eUdNzhxgVz7y3AYF-hlc7So_pp0NxCf4zg0jU6snOT8]
+ *       - bearerAuth: [eyJhb...]
  *     parameters:
  *       - in: path
  *         name: tourId
@@ -73,7 +73,7 @@ router.route('/:id').delete(bookingController.deleteBooking);
  *     summary: Stripe webhook for checkout session
  *     tags: [Booking]
  *     security:
- *       - bearerAuth: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzdjNTVjODM4Yjg1YWQwMGNjYjdhMyIsImlhdCI6MTc1MjY3OTc3NiwiZXhwIjoxNzYwNDU1Nzc2fQ.eUdNzhxgVz7y3AYF-hlc7So_pp0NxCf4zg0jU6snOT8]
+ *       - bearerAuth: [eyJhb...8]
  *     requestBody:
  *       required: true
  *       content:
@@ -106,7 +106,7 @@ router.route('/:id').delete(bookingController.deleteBooking);
  *     summary: Get a booking by ID
  *     tags: [Booking]
  *     security:
- *       - bearerAuth: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzdjNTVjODM4Yjg1YWQwMGNjYjdhMyIsImlhdCI6MTc1MjY3OTc3NiwiZXhwIjoxNzYwNDU1Nzc2fQ.eUdNzhxgVz7y3AYF-hlc7So_pp0NxCf4zg0jU6snOT8]
+ *       - bearerAuth: [eyJhb...]
  *     parameters:
  *       - in: path
  *         name: id

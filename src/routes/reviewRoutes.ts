@@ -38,7 +38,7 @@ router
  *     summary: Get all reviews
  *     tags: [Review]
  *     security:
- *       - bearerAuth: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzdjNTVjODM4Yjg1YWQwMGNjYjdhMyIsImlhdCI6MTc1MjY3OTc3NiwiZXhwIjoxNzYwNDU1Nzc2fQ.eUdNzhxgVz7y3AYF-hlc7So_pp0NxCf4zg0jU6snOT8]
+ *       - bearerAuth: [eyJhb...]
  *     responses:
  *       200:
  *         description: List of all reviews
@@ -69,7 +69,7 @@ router
  *     summary: Create a new review
  *     tags: [Review]
  *     security:
- *       - bearerAuth: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzdjNTVjODM4Yjg1YWQwMGNjYjdhMyIsImlhdCI6MTc1MjY3OTc3NiwiZXhwIjoxNzYwNDU1Nzc2fQ.eUdNzhxgVz7y3AYF-hlc7So_pp0NxCf4zg0jU6snOT8]
+ *       - bearerAuth: [eyJhb...]
  *     requestBody:
  *       required: true
  *       content:
@@ -126,7 +126,7 @@ router
  *     summary: Update a review
  *     tags: [Review]
  *     security:
- *       - bearerAuth: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzdjNTVjODM4Yjg1YWQwMGNjYjdhMyIsImlhdCI6MTc1MjY3OTc3NiwiZXhwIjoxNzYwNDU1Nzc2fQ.eUdNzhxgVz7y3AYF-hlc7So_pp0NxCf4zg0jU6snOT8]
+ *       - bearerAuth: [eyJhb...]
  *     parameters:
  *       - in: path
  *         name: id
@@ -183,7 +183,7 @@ router
  *     summary: Delete a review
  *     tags: [Review]
  *     security:
- *       - bearerAuth: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzdjNTVjODM4Yjg1YWQwMGNjYjdhMyIsImlhdCI6MTc1MjY3OTc3NiwiZXhwIjoxNzYwNDU1Nzc2fQ.eUdNzhxgVz7y3AYF-hlc7So_pp0NxCf4zg0jU6snOT8]
+ *       - bearerAuth: [eyJh...]
  *     parameters:
  *       - in: path
  *         name: id

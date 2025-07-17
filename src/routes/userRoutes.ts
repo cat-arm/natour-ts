@@ -100,7 +100,7 @@ export default router;
  *               type: object
  *               example:
  *                 status: success
- *                 token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzdjNTVjODM4Yjg1YWQwMGNjYjdhMyIsImlhdCI6MTc1MjY3OTc3NiwiZXhwIjoxNzYwNDU1Nzc2fQ.eUdNzhxgVz7y3AYF-hlc7So_pp0NxCf4zg0jU6snOT8
+ *                 token: eyJh...
  *                 data:
  *                   userObj:
  *                     _id: 6877c55c838b85ad00ccb7a3
@@ -146,7 +146,7 @@ export default router;
  *                   example: success
  *                 token:
  *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzNkZTczYjRkNWU2NTRmZWFlZDNmMCIsImlhdCI6MTc1MjY3OTMwMywiZXhwIjoxNzYwNDU1MzAzfQ.SdavqKM8__K4M8HeTBCx0Ki3Fyb_jiK7zq2_ON4bc38
+ *                   example: eyJh...
  *                 data:
  *                   type: object
  *                   example:
@@ -168,7 +168,7 @@ export default router;
  *     summary: Get current user profile
  *     tags: [Auth]
  *     security:
- *       - bearerAuth: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzNkZTczYjRkNWU2NTRmZWFlZDNmMCIsImlhdCI6MTc1MjY3OTMwMywiZXhwIjoxNzYwNDU1MzAzfQ.SdavqKM8__K4M8HeTBCx0Ki3Fyb_jiK7zq2_ON4bc38]
+ *       - bearerAuth: [eyJh...]
  *     responses:
  *       200:
  *         description: User profile
@@ -182,7 +182,7 @@ export default router;
  *                   example: success
  *                 token:
  *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzNkZTczYjRkNWU2NTRmZWFlZDNmMCIsImlhdCI6MTc1MjY3OTMwMywiZXhwIjoxNzYwNDU1MzAzfQ.SdavqKM8__K4M8HeTBCx0Ki3Fyb_jiK7zq2_ON4bc38
+ *                   example: eyJh...
  *                 data:
  *                   type: object
  *                   example:
@@ -202,7 +202,7 @@ export default router;
  *     summary: Update current user's password
  *     tags: [Auth]
  *     security:
- *       - bearerAuth: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzdjNTVjODM4Yjg1YWQwMGNjYjdhMyIsImlhdCI6MTc1MjY3OTc3NiwiZXhwIjoxNzYwNDU1Nzc2fQ.eUdNzhxgVz7y3AYF-hlc7So_pp0NxCf4zg0jU6snOT8]
+ *       - bearerAuth: [eyJh...]
  *     requestBody:
  *       required: true
  *       content:
